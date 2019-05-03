@@ -34,16 +34,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Kepware.ClientAce.BrowseControls">
-      <HintPath>..\..\..\..\client-Example\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.BrowseControls.dll</HintPath>
+      <HintPath>refs\Kepware.ClientAce.BrowseControls.dll</HintPath>
     </Reference>
     <Reference Include="Kepware.ClientAce.DA_Junction">
-      <HintPath>..\..\..\..\client-Example\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.DA_Junction.dll</HintPath>
+      <HintPath>refs\Kepware.ClientAce.DA_Junction.dll</HintPath>
     </Reference>
     <Reference Include="Kepware.ClientAce.KEPServerExControls">
-      <HintPath>..\..\..\..\client-Example\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.KEPServerExControls.dll</HintPath>
+      <HintPath>refs\Kepware.ClientAce.KEPServerExControls.dll</HintPath>
     </Reference>
     <Reference Include="Kepware.ClientAce.OpcClient">
-      <HintPath>..\..\..\..\client-Example\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.OpcClient.dll</HintPath>
+      <HintPath>refs\Kepware.ClientAce.OpcClient.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
