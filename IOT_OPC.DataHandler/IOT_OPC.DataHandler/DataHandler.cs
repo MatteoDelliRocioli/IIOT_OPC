@@ -1,15 +1,13 @@
-﻿using Kepware.ClientAce.OpcDaClient;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace IIOT_OPC
+﻿namespace IIOT_OPC
 {
+    using IOT_OPC.DataHandler;
+    using Kepware.ClientAce.OpcDaClient;
+    using System;
     public class DatasHandler
     {
         DaServerMgt daServerMgt = new Kepware.ClientAce.OpcDaClient.DaServerMgt();
         ConnectInfo connectInfo = new Kepware.ClientAce.OpcDaClient.ConnectInfo();
-
+        PlantStateHandler _plantState = new PlantStateHandler(); // todo: init this object with PlantState argument
         public void Connect(/*object sender, EventArgs e*/)
         {
             connectInfo.LocalId = "en";
@@ -147,6 +145,11 @@ namespace IIOT_OPC
                 Console.WriteLine(ex.ToString());
             }
 
+        }
+
+        private void OnPlantStateChange (PlantState newState)
+        {
+            _plantState.State = newState;
         }
     }
 }
