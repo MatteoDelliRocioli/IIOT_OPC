@@ -1,4 +1,4 @@
-﻿namespace IOT_OPC.DataHandler
+﻿namespace IIOT_OPC.Shared.Models
 {
     using System;
 

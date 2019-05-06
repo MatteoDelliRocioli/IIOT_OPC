@@ -1,13 +1,43 @@
 ﻿namespace IIOT_OPC
 {
+    using IIOT_OPC.Shared.Models;
     using IOT_OPC.DataHandler;
     using Kepware.ClientAce.OpcDaClient;
     using System;
     public class DatasHandler
     {
-        DaServerMgt daServerMgt = new Kepware.ClientAce.OpcDaClient.DaServerMgt();
-        ConnectInfo connectInfo = new Kepware.ClientAce.OpcDaClient.ConnectInfo();
+        DaServerMgt daServerMgt = new DaServerMgt();
+        ConnectInfo connectInfo = new ConnectInfo();
         PlantStateHandler _plantState = new PlantStateHandler(); // todo: init this object with PlantState argument
+
+        public DatasHandler()
+        {
+            daServerMgt.DataChanged += DaServerMgt_DataChanged;
+        }
+
+        public void DaServerMgt_DataChanged(int clientSubscription, bool allQualitiesGood, bool noErrors, ItemValueCallback[] itemValues)
+        {
+            try
+            {
+                foreach (ItemValueCallback itemValue in itemValues)
+                {
+                    if (itemValue.ResultID.Succeeded)
+                    {
+
+                        Console.WriteLine(itemValue.TimeStamp + ": " + itemValue.ClientHandle + " - " + itemValue.Value + "\n");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Errore");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DataChanged exception. Reason: {0}", ex);
+            }
+        }
+
         public void Connect(/*object sender, EventArgs e*/)
         {
             connectInfo.LocalId = "en";
@@ -40,17 +70,17 @@
             AggiornaDati();
 
             // Tag a cui mi voglio sottoscrivere
-            ItemIdentifier[] items = new ItemIdentifier[2];
-            /*items[0] = new ItemIdentifier
+            ItemIdentifier[] items = new ItemIdentifier[1];
+            items[0] = new ItemIdentifier
             {
                 ItemName = "its-iot-device.Device1.PlantStatus",
                 ClientHandle = "PlantStatus"
-            };*/
-            items[1] = new ItemIdentifier
+            };
+            /*items[1] = new ItemIdentifier
             {
                 ItemName = "its-iot-device.Device1.PieceCounter",
                 ClientHandle = "PieceCounter"
-            };
+            };*/
             /*items[2] = new ItemIdentifier
             {
                 ItemName = "Simulation Examples.Functions.Ramp1",
@@ -90,23 +120,23 @@
             // Aggiorno a mano i valori di tre tag
 
             int maxAge = 0;
-            Kepware.ClientAce.OpcDaClient.ItemIdentifier[] OPCItems = new Kepware.ClientAce.OpcDaClient.ItemIdentifier[2];
-            Kepware.ClientAce.OpcDaClient.ItemValue[] OPCItemValues = null;
+            ItemIdentifier[] OPCItems = new ItemIdentifier[2];
+            ItemValue[] OPCItemValues = null;
 
-            /*OPCItems[0] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
+            OPCItems[0] = new ItemIdentifier();
             OPCItems[0].ItemName = "its-iot-device.Device1.PlantStatus";
-            OPCItems[0].ClientHandle = 1;*/
+            OPCItems[0].ClientHandle = 1;
 
-            OPCItems[1] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
+            OPCItems[1] = new ItemIdentifier();
             OPCItems[1].ItemName = "its-iot-device.Device1.PieceCounter";
-            OPCItems[1].ClientHandle = 1;
+            OPCItems[1].ClientHandle = 2;
 
             /*OPCItems[2] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
             OPCItems[2].ItemName = "Simulation Examples.Functions.Ramp1";
             OPCItems[2].ClientHandle = 3;*/
 
             /*Console.WriteLine(OPCItems[0].ItemName + "\n");*/
-            Console.WriteLine(OPCItems[1].ItemName + "ciao !!!!!!!\n");
+            Console.WriteLine(OPCItems[0].ItemName + "ciao !!!!!!!\n");
             /*Console.WriteLine(OPCItems[2].ItemName + "\n");*/
 
             try
@@ -122,13 +152,13 @@
                     Console.WriteLine(OPCItems[0].ResultID.Description + "\n");
                 }*/
 
-                if (OPCItems[1].ResultID.Succeeded & OPCItemValues[1].Quality.IsGood)
+                if (OPCItems[0].ResultID.Succeeded & OPCItemValues[0].Quality.IsGood)
                 {
-                    Console.WriteLine(OPCItemValues[1].Value.ToString() + "\n");
+                    Console.WriteLine(OPCItemValues[0].Value.ToString() + "\n");
                 }
                 else
                 {
-                    Console.WriteLine(OPCItems[1].ResultID.Description + "\n");
+                    Console.WriteLine(OPCItems[0].ResultID.Description + "\n");
                 }
 
                 /*if (OPCItems[2].ResultID.Succeeded & OPCItemValues[1].Quality.IsGood)
@@ -147,18 +177,18 @@
 
         }
 
-        private void OnPlantStateChange (PlantState newState)
+        private void OnPlantStateChange(PlantState newState)
         {
             _plantState.SetCurrentState(new DateTime(), newState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
         }
         private void OnMidnight()
         {
-            var now =new DateTime( DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23,59,59);
+            var now = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23, 59, 59);
             _plantState.SetCurrentState(now, _plantState.CurrentState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
             now = now.AddSeconds(1);
-            _plantState = new PlantStateHandler(now,_plantState.CurrentState);
+            _plantState = new PlantStateHandler(now, _plantState.CurrentState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
         }
         private void SavePlantStateToDb(PlantStateRowData rowData)

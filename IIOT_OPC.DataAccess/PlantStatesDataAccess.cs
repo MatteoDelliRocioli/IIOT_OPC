@@ -2,14 +2,14 @@
 {
     using IIOT_OPC.Shared.Extensions;
     using IIOT_OPC.Shared.Models;
-    public class PlantStatesDataAccess : AbstractDataAccess<PlantStates>
+    public class PlantStatesDataAccess : AbstractDataAccess<PlantStateRowData>
     {
-        public override int Delete(PlantStates item)
+        public override int Delete(PlantStateRowData item)
         {
             throw new System.NotImplementedException();
         }
 
-        public override PlantStates GetItem(object filter)
+        public override PlantStateRowData GetItem(object filter)
         {
             string query = @"
                 SELECT Id
@@ -20,7 +20,7 @@
             return GetItem(query.ApplyFilters("{filter}", filter), filter);
         }
 
-        public override int Insert(PlantStates item)
+        public override int Insert(PlantStateRowData item)
         {
             string query = @"
                 INSERT INTO dbo.PlantStates
@@ -32,7 +32,7 @@
             return Insert(query, item);
         }
 
-        public override int Update(PlantStates item)
+        public override int Update(PlantStateRowData item)
         {
             throw new System.NotImplementedException();
         }

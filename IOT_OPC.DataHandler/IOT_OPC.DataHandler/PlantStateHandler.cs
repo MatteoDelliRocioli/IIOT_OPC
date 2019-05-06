@@ -1,5 +1,6 @@
 ﻿namespace IOT_OPC.DataHandler
 {
+    using IIOT_OPC.Shared.Models;
     using System;
     using System.Collections.Generic;
 
@@ -46,9 +47,9 @@
             get
             {
                 return new PlantStateRowData()
-                {
-                    CurrentState = CurrentState,
-                    StartTime = _startTime
+                {                
+                    PlantState = CurrentState,
+                    TimeStamp = _startTime
                 };
 
             }
@@ -80,12 +81,5 @@
                 };
             }
         }
-    }
-    public enum PlantState
-    {                     // plc internal bit state       On/Off  Running/stopped
-        Off = 0x0,        // plant is Off                   0         0
-        OnRunning = 0x3,  // plant is On  and Running       1         1
-        OnStopped = 0x1   // Plant is On  and Stopped       1         0
-     // OffRunning = 0x2  // Plant is Off BUT Running       0         1     Invalid state
     }
 }
