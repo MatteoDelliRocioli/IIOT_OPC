@@ -1,15 +1,13 @@
-﻿using Kepware.ClientAce.OpcDaClient;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace IIOT_OPC
+﻿namespace IIOT_OPC
 {
+    using IOT_OPC.DataHandler;
+    using Kepware.ClientAce.OpcDaClient;
+    using System;
     public class DatasHandler
     {
         DaServerMgt daServerMgt = new Kepware.ClientAce.OpcDaClient.DaServerMgt();
         ConnectInfo connectInfo = new Kepware.ClientAce.OpcDaClient.ConnectInfo();
-
+        PlantStateHandler _plantState = new PlantStateHandler(); // todo: init this object with PlantState argument
         public void Connect(/*object sender, EventArgs e*/)
         {
             connectInfo.LocalId = "en";
@@ -146,6 +144,25 @@ namespace IIOT_OPC
             {
                 Console.WriteLine(ex.ToString());
             }
+
+        }
+
+        private void OnPlantStateChange (PlantState newState)
+        {
+            _plantState.SetCurrentState(new DateTime(), newState);
+            SavePlantStateToDb(_plantState.PlantStateRowData);
+        }
+        private void OnMidnight()
+        {
+            var now =new DateTime( DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23,59,59);
+            _plantState.SetCurrentState(now, _plantState.CurrentState);
+            SavePlantStateToDb(_plantState.PlantStateRowData);
+            now = now.AddSeconds(1);
+            _plantState = new PlantStateHandler(now,_plantState.CurrentState);
+            SavePlantStateToDb(_plantState.PlantStateRowData);
+        }
+        private void SavePlantStateToDb(PlantStateRowData rowData)
+        {
 
         }
     }
