@@ -124,6 +124,7 @@
             ItemValue[] OPCItemValues = null;
 
             OPCItems[0] = new ItemIdentifier();
+    
             OPCItems[0].ItemName = "its-iot-device.Device1.PlantStatus";
             OPCItems[0].ClientHandle = 1;
 
