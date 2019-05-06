@@ -15,6 +15,7 @@ namespace IOT_OPC.DataHandler
 
             DatasHandler handler = new DatasHandler();
 
+            //handler.DaServerMgt_DataChanged(1, true,true)
             handler.Connect();
             Console.ReadLine();
         }
