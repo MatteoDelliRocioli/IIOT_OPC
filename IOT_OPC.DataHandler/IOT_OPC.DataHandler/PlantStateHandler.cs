@@ -8,11 +8,7 @@
     /// </summary>
     public class PlantStateHandler
     {
-        /// <summary>
-        /// the current state of the plant
-        /// </summary>
-        private PlantState _currentState;
-        private DateTime _lastChangeTime;
+        private DateTime _startTime;
         Dictionary<PlantState, TimeSpan> _statesDuration;
 
         /// <summary>
@@ -26,44 +22,62 @@
         /// a new object is called providing a initial state
         /// </summary>
         /// <param name="currentState"></param>
-        public PlantStateHandler(PlantState currentState)
+        public PlantStateHandler(PlantState currentState): this(new DateTime(), currentState)
+        {
+        }
+
+        public PlantStateHandler(DateTime startTime, PlantState currentState)
         {
             _statesDuration = new Dictionary<PlantState, TimeSpan>();
-            _currentState = currentState;
-            _lastChangeTime = new DateTime();
-            //_statesDuration.Add(PlantState.Off, 0);
-            //_statesDuration.Add(PlantState.OnRunning, 0);
-            //_statesDuration.Add(PlantState.OnStopped, 0);
+            _startTime = startTime;
+            CurrentState = currentState;
+            _statesDuration.Add(PlantState.Off, new TimeSpan(0));
+            _statesDuration.Add(PlantState.OnRunning, new TimeSpan(0));
+            _statesDuration.Add(PlantState.OnStopped, new TimeSpan(0));
         }
 
         /// <summary>
         /// when a new state is set, the current state duration is updated then
         /// the the lastTimeChange and the new currentState is set 
         /// </summary>
-        public PlantState State
+        public PlantState CurrentState { get; private set; }
+        public PlantStateRowData PlantStateRowData
         {
-            get => _currentState;
-            set
+            get
             {
-                // retrieve, the last duration for the current state
-                // and remove the key from the dictionary
-                if (_statesDuration.TryGetValue(_currentState, out TimeSpan lastStateDuration))
+                return new PlantStateRowData()
                 {
-                    _statesDuration.Remove(_currentState);
-                }
-                else
-                {
-                    lastStateDuration = new TimeSpan(0);
-                }
-                // calculate and update the duration for the current state
-                DateTime currentTime = new DateTime();
-                TimeSpan currentStateDuration = currentTime - _lastChangeTime;
-                // store the value in the dictionary
-                _statesDuration.Add(_currentState, lastStateDuration + currentStateDuration);
+                    CurrentState = CurrentState,
+                    StartTime = _startTime
+                };
 
-                // store new current state anc current time
-                _lastChangeTime = currentTime;
-                _currentState = value;
+            }
+        }
+        public void SetCurrentState(DateTime currentTime, PlantState value)
+        {
+            // retrieve, the last duration for the current state
+            // and remove the key from the dictionary
+            var lastStateDuration = _statesDuration[CurrentState];            
+            // calculate and update the duration for the current state
+            TimeSpan currentStateDuration = currentTime - _startTime;
+
+            // store the value in the dictionary
+            _statesDuration[CurrentState] = lastStateDuration + currentStateDuration;
+
+            // store new current state anc current time
+            _startTime = currentTime;
+            CurrentState = value;
+        }
+        public PlantStateDuration PlantStateDuration
+        {
+            get
+            {
+                return new PlantStateDuration()
+                {
+                    OffDuration = _statesDuration[PlantState.Off],
+                    OnRunningDuration = _statesDuration[PlantState.OnRunning],
+                    OnStoppedfDuration = _statesDuration[PlantState.OnStopped]
+                };
             }
         }
     }

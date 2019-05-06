@@ -149,7 +149,21 @@
 
         private void OnPlantStateChange (PlantState newState)
         {
-            _plantState.State = newState;
+            _plantState.SetCurrentState(new DateTime(), newState);
+            SavePlantStateToDb(_plantState.PlantStateRowData);
+        }
+        private void OnMidnight()
+        {
+            var now =new DateTime( DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23,59,59);
+            _plantState.SetCurrentState(now, _plantState.CurrentState);
+            SavePlantStateToDb(_plantState.PlantStateRowData);
+            now = now.AddSeconds(1);
+            _plantState = new PlantStateHandler(now,_plantState.CurrentState);
+            SavePlantStateToDb(_plantState.PlantStateRowData);
+        }
+        private void SavePlantStateToDb(PlantStateRowData rowData)
+        {
+
         }
     }
 }
