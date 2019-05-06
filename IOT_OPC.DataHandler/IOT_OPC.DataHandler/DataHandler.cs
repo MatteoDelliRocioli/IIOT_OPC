@@ -1,12 +1,13 @@
 ﻿namespace IIOT_OPC
 {
+    using IIOT_OPC.Shared.Models;
     using IOT_OPC.DataHandler;
     using Kepware.ClientAce.OpcDaClient;
     using System;
     public class DatasHandler
     {
-        DaServerMgt daServerMgt = new Kepware.ClientAce.OpcDaClient.DaServerMgt();
-        ConnectInfo connectInfo = new Kepware.ClientAce.OpcDaClient.ConnectInfo();
+        DaServerMgt daServerMgt = new DaServerMgt();
+        ConnectInfo connectInfo = new ConnectInfo();
         PlantStateHandler _plantState = new PlantStateHandler(); // todo: init this object with PlantState argument
 
         public DatasHandler()
@@ -119,14 +120,15 @@
             // Aggiorno a mano i valori di tre tag
 
             int maxAge = 0;
-            Kepware.ClientAce.OpcDaClient.ItemIdentifier[] OPCItems = new Kepware.ClientAce.OpcDaClient.ItemIdentifier[2];
-            Kepware.ClientAce.OpcDaClient.ItemValue[] OPCItemValues = null;
+            ItemIdentifier[] OPCItems = new ItemIdentifier[2];
+            ItemValue[] OPCItemValues = null;
 
-            OPCItems[0] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
+            OPCItems[0] = new ItemIdentifier();
+    
             OPCItems[0].ItemName = "its-iot-device.Device1.PlantStatus";
             OPCItems[0].ClientHandle = 1;
 
-            OPCItems[1] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
+            OPCItems[1] = new ItemIdentifier();
             OPCItems[1].ItemName = "its-iot-device.Device1.PieceCounter";
             OPCItems[1].ClientHandle = 2;
 
@@ -176,18 +178,18 @@
 
         }
 
-        private void OnPlantStateChange (PlantState newState)
+        private void OnPlantStateChange(PlantState newState)
         {
             _plantState.SetCurrentState(new DateTime(), newState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
         }
         private void OnMidnight()
         {
-            var now =new DateTime( DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23,59,59);
+            var now = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23, 59, 59);
             _plantState.SetCurrentState(now, _plantState.CurrentState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
             now = now.AddSeconds(1);
-            _plantState = new PlantStateHandler(now,_plantState.CurrentState);
+            _plantState = new PlantStateHandler(now, _plantState.CurrentState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
         }
         private void SavePlantStateToDb(PlantStateRowData rowData)

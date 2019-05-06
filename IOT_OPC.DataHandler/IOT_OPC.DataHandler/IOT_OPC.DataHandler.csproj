@@ -56,14 +56,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataHandler.cs" />
-    <Compile Include="PlantStateDuration.cs" />
     <Compile Include="PlantStateHandler.cs" />
-    <Compile Include="PlantStateRowData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\IIOT_OPC.DataAccess\IIOT_OPC.DataAccess.csproj">
+      <Project>{a36a8320-6e80-491b-9c93-c9e40b82e052}</Project>
+      <Name>IIOT_OPC.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\IIOT_OPC.Shared\IIOT_OPC.Shared.csproj">
+      <Project>{aa0d8064-80e7-425e-9799-e742c8a67dd2}</Project>
+      <Name>IIOT_OPC.Shared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

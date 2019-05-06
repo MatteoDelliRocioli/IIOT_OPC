@@ -10,11 +10,45 @@
         static void Main(string[] args)
         {
             ConfigBuilder<AppConfig> _appsettings = new ConfigBuilder<AppConfig>(Utils.FileToProjectDirectory("..\\IIOT_OPCconfig.json"));
-            AbstractDataAccess<DailyProduction> dailyProductiondataAccess = new DailyProductionDataAccess() { ConnectionString = _appsettings.Config.ConnectionString };
+            AbstractDataAccess<DailyProduction> dailyProductionDataAccess = new DailyProductionDataAccess() { ConnectionString = _appsettings.Config.ConnectionString };
 
-            dailyProductiondataAccess.Insert(new DailyProduction { TimeStamp = new DateTime(1999,2,3), NumPieces = 12, NumPiecesRejected = 0 });
-            dailyProductiondataAccess.Insert(new DailyProduction { TimeStamp = new DateTime(1999,3,3), NumPieces = 24, NumPiecesRejected = 0 });
-            dailyProductiondataAccess.Insert(new DailyProduction { TimeStamp = new DateTime(1999, 3,4), NumPieces = 35, NumPiecesRejected = 5 });
+            // insert new items
+            dailyProductionDataAccess.Insert(
+                new DailyProduction
+                        {
+                            TimeStamp = new DateTime(1999,2,3)
+                            , NumPieces = 12
+                            , NumPiecesRejected = 0
+                        }
+                );
+            dailyProductionDataAccess.Insert(new DailyProduction { TimeStamp = new DateTime(1999,3,3), NumPieces = 24, NumPiecesRejected = 0 });
+            dailyProductionDataAccess.Insert(new DailyProduction { TimeStamp = new DateTime(1999, 3,4), NumPieces = 35, NumPiecesRejected = 5 });
+
+            // retrieve items by filters
+            var itemByDate = dailyProductionDataAccess.GetItem(
+                new
+                        {
+                            TimeStamp = new DateTime(1999, 3, 3)
+                        }
+                );
+            var itemById = dailyProductionDataAccess.GetItem(new { Id = 2 });
+            var itemByPieces = dailyProductionDataAccess.GetItem(new { NumPieces = 2 });
+
+            AbstractDataAccess<PlantStates> plantStatesDataAccess = new PlantStatesDataAccess() { ConnectionString = _appsettings.Config.ConnectionString };
+
+            plantStatesDataAccess.Insert(
+                new PlantStates
+                        {
+                            TimeStamp = new DateTime(1999, 2, 3, 6, 36, 11)
+                            , PlantState = 1
+                        }
+                );
+            plantStatesDataAccess.Insert(new PlantStates { TimeStamp = new DateTime(1999, 2, 3, 7, 00, 45), PlantState = 2 });
+            plantStatesDataAccess.Insert(new PlantStates { TimeStamp = new DateTime(1999, 2, 3, 12, 24, 13), PlantState = 3 });
+            plantStatesDataAccess.Insert(new PlantStates { TimeStamp = new DateTime(1999, 2, 3, 12, 25, 54), PlantState = 2 });
+            plantStatesDataAccess.Insert(new PlantStates { TimeStamp = new DateTime(1999, 2, 3, 18, 16, 9), PlantState = 1 });
+
+            var stateByDate = plantStatesDataAccess.GetItem(new { TimeStamp = new DateTime(1999, 2, 3, 7, 00, 45) });
         }
     }
 }
