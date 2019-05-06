@@ -9,6 +9,11 @@
         ConnectInfo connectInfo = new Kepware.ClientAce.OpcDaClient.ConnectInfo();
         PlantStateHandler _plantState = new PlantStateHandler(); // todo: init this object with PlantState argument
 
+        public DatasHandler()
+        {
+            daServerMgt.DataChanged += DaServerMgt_DataChanged;
+        }
+
         public void DaServerMgt_DataChanged(int clientSubscription, bool allQualitiesGood, bool noErrors, ItemValueCallback[] itemValues)
         {
             try
@@ -65,16 +70,16 @@
 
             // Tag a cui mi voglio sottoscrivere
             ItemIdentifier[] items = new ItemIdentifier[1];
-            /*items[0] = new ItemIdentifier
+            items[0] = new ItemIdentifier
             {
                 ItemName = "its-iot-device.Device1.PlantStatus",
                 ClientHandle = "PlantStatus"
-            };*/
-            items[0] = new ItemIdentifier
+            };
+            /*items[1] = new ItemIdentifier
             {
                 ItemName = "its-iot-device.Device1.PieceCounter",
                 ClientHandle = "PieceCounter"
-            };
+            };*/
             /*items[2] = new ItemIdentifier
             {
                 ItemName = "Simulation Examples.Functions.Ramp1",
@@ -114,16 +119,16 @@
             // Aggiorno a mano i valori di tre tag
 
             int maxAge = 0;
-            Kepware.ClientAce.OpcDaClient.ItemIdentifier[] OPCItems = new Kepware.ClientAce.OpcDaClient.ItemIdentifier[1];
+            Kepware.ClientAce.OpcDaClient.ItemIdentifier[] OPCItems = new Kepware.ClientAce.OpcDaClient.ItemIdentifier[2];
             Kepware.ClientAce.OpcDaClient.ItemValue[] OPCItemValues = null;
 
-            /*OPCItems[0] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
-            OPCItems[0].ItemName = "its-iot-device.Device1.PlantStatus";
-            OPCItems[0].ClientHandle = 1;*/
-
             OPCItems[0] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
-            OPCItems[0].ItemName = "its-iot-device.Device1.PieceCounter";
+            OPCItems[0].ItemName = "its-iot-device.Device1.PlantStatus";
             OPCItems[0].ClientHandle = 1;
+
+            OPCItems[1] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
+            OPCItems[1].ItemName = "its-iot-device.Device1.PieceCounter";
+            OPCItems[1].ClientHandle = 2;
 
             /*OPCItems[2] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
             OPCItems[2].ItemName = "Simulation Examples.Functions.Ramp1";
