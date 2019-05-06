@@ -34,19 +34,19 @@
             var itemById = dailyProductionDataAccess.GetItem(new { Id = 2 });
             var itemByPieces = dailyProductionDataAccess.GetItem(new { NumPieces = 2 });
 
-            AbstractDataAccess<PlantStates> plantStatesDataAccess = new PlantStatesDataAccess() { ConnectionString = _appsettings.Config.ConnectionString };
+            AbstractDataAccess<PlantStateRowData> plantStatesDataAccess = new PlantStatesDataAccess() { ConnectionString = _appsettings.Config.ConnectionString };
 
             plantStatesDataAccess.Insert(
-                new PlantStates
-                        {
+                new PlantStateRowData
+                {
                             TimeStamp = new DateTime(1999, 2, 3, 6, 36, 11)
-                            , PlantState = 1
+                            , PlantState = (PlantState)1
                         }
                 );
-            plantStatesDataAccess.Insert(new PlantStates { TimeStamp = new DateTime(1999, 2, 3, 7, 00, 45), PlantState = 2 });
-            plantStatesDataAccess.Insert(new PlantStates { TimeStamp = new DateTime(1999, 2, 3, 12, 24, 13), PlantState = 3 });
-            plantStatesDataAccess.Insert(new PlantStates { TimeStamp = new DateTime(1999, 2, 3, 12, 25, 54), PlantState = 2 });
-            plantStatesDataAccess.Insert(new PlantStates { TimeStamp = new DateTime(1999, 2, 3, 18, 16, 9), PlantState = 1 });
+            plantStatesDataAccess.Insert(new PlantStateRowData { TimeStamp = new DateTime(1999, 2, 3, 7, 00, 45), PlantState = (PlantState)2 });
+            plantStatesDataAccess.Insert(new PlantStateRowData { TimeStamp = new DateTime(1999, 2, 3, 12, 24, 13), PlantState = (PlantState)3 });
+            plantStatesDataAccess.Insert(new PlantStateRowData { TimeStamp = new DateTime(1999, 2, 3, 12, 25, 54), PlantState = (PlantState)2 });
+            plantStatesDataAccess.Insert(new PlantStateRowData { TimeStamp = new DateTime(1999, 2, 3, 18, 16, 9), PlantState = (PlantState)1 });
 
             var stateByDate = plantStatesDataAccess.GetItem(new { TimeStamp = new DateTime(1999, 2, 3, 7, 00, 45) });
         }

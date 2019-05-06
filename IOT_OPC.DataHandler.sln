@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IOT_OPC.DataHandler", "IOT_OPC.DataHandler\IOT_OPC.DataHandler.csproj", "{F1711372-BAD7-4F39-A261-27A28DFDC684}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IIOT_OPC.Shared", "..\IIOT_OPC.Shared\IIOT_OPC.Shared.csproj", "{AA0D8064-80E7-425E-9799-E742C8A67DD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IIOT_OPC.Shared", "IIOT_OPC.Shared\IIOT_OPC.Shared.csproj", "{AA0D8064-80E7-425E-9799-E742C8A67DD2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IIOT_OPC.DataAccess", "..\IIOT_OPC.DataAccess\IIOT_OPC.DataAccess.csproj", "{A36A8320-6E80-491B-9C93-C9E40B82E052}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IIOT_OPC.DataAccess", "IIOT_OPC.DataAccess\IIOT_OPC.DataAccess.csproj", "{A36A8320-6E80-491B-9C93-C9E40B82E052}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

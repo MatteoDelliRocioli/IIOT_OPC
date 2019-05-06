@@ -65,7 +65,7 @@
             // store the value in the dictionary
             _statesDuration[CurrentState] = lastStateDuration + currentStateDuration;
 
-            // store new current state anc current time
+            // store new current state and current time
             _startTime = currentTime;
             CurrentState = value;
         }

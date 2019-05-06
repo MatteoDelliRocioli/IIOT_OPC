@@ -86,7 +86,7 @@
         /// <summary>
         /// Salva l'Oggetto di configurazione di classe T in un file JSON con nome 'nomeFile'
         /// </summary>
-        /// <param name="filename">Nome del file in cui slavare l'Oggetto di configurazione di classe T</param>
+        /// <param name="filename">Nome del file in cui salvare l'Oggetto di configurazione di classe T</param>
         /// <returns>Questo Builder</returns>
         public ConfigBuilder<T> SaveTo(string filename)
         {

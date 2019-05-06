@@ -6,7 +6,7 @@
         public DateTime TimeStamp { get; set; }
         public PlantState PlantState { get; set; }
     }
-    public enum PlantState
+    public enum PlantState : int 
     {                     // plc internal bit state       On/Off  Running/stopped
         Off = 0x0,        // plant is Off                   0         0
         OnRunning = 0x3,  // plant is On  and Running       1         1

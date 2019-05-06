@@ -7,17 +7,26 @@
     using IOT_OPC.DataHandler;
     using Kepware.ClientAce.OpcDaClient;
     using System;
+    using System.Timers;
+
     public class DatasHandler
     {
         DaServerMgt daServerMgt = new DaServerMgt();
         ConnectInfo connectInfo = new ConnectInfo();
-        PlantStateHandler _plantState = new PlantStateHandler(); // todo: init this object with PlantState argument
+        PlantStateHandler _plantState; // todo: init this object with PlantState argument
         ConfigBuilder<AppConfig> _appsettings = new ConfigBuilder<AppConfig>(Utils.FileToProjectDirectory("..\\IIOT_OPCconfig.json"));
+        AbstractDataAccess<PlantStateRowData> plantStateDataAccess;
+        Timer timerMidnight;
 
         public DatasHandler()
         {
             daServerMgt.DataChanged += DaServerMgt_DataChanged;
-            var ConnectionString = _appsettings.Config.ConnectionString;          
+            var connectionString = _appsettings.Config.ConnectionString;
+            //var ConnectionString = ("Data Source=DESKTOP-KE529L7\\SQLEXPRESS;Initial Catalog=iotOpc;Integrated Security=True");      
+            plantStateDataAccess = new PlantStatesDataAccess()
+            {
+                ConnectionString = connectionString
+            };
         }
 
         public void DaServerMgt_DataChanged(int clientSubscription, bool allQualitiesGood, bool noErrors, ItemValueCallback[] itemValues)
@@ -28,8 +37,17 @@
                 {
                     if (itemValue.ResultID.Succeeded)
                     {
-
                         Console.WriteLine(itemValue.TimeStamp + ": " + itemValue.ClientHandle + " - " + itemValue.Value + "\n");
+                        var state = itemValue.Value;
+                        PlantState plant;
+                        Enum.TryParse<PlantState>(itemValue.Value.ToString(), out plant);
+                        if (_plantState == null)
+                        {
+                            _plantState = new PlantStateHandler(itemValue.TimeStamp, plant);
+                        }
+                        //plantStateDataAccess.Insert(new PlantStateRowData() { PlantState = (PlantState)plant, TimeStamp = itemValue.TimeStamp });
+
+                        OnPlantStateChange(itemValue.TimeStamp, plant);
                     }
                     else
                     {
@@ -71,6 +89,8 @@
             {
                 Console.WriteLine(ex.ToString());
             }
+
+            timerMidnight.Elapsed += (sender, e) => OnMidnight();
 
             AggiornaDati();
 
@@ -183,22 +203,27 @@
 
         }
 
-        private void OnPlantStateChange(PlantState newState)
+        private void OnPlantStateChange(DateTime timeStamp, PlantState newState)
         {
-            _plantState.SetCurrentState(new DateTime(), newState);
+            _plantState.SetCurrentState(timeStamp, newState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
         }
         private void OnMidnight()
         {
+            timerMidnight.Interval = 860000399; //resets the timer
+            //the following updated the object
             var now = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23, 59, 59);
             _plantState.SetCurrentState(now, _plantState.CurrentState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
             now = now.AddSeconds(1);
             _plantState = new PlantStateHandler(now, _plantState.CurrentState);
+            //missing polling operations (read and persistence);
             SavePlantStateToDb(_plantState.PlantStateRowData);
+
         }
         private void SavePlantStateToDb(PlantStateRowData rowData)
         {
+            plantStateDataAccess.Insert(rowData);
         }
     }
 }
