@@ -1,5 +1,8 @@
 ﻿namespace IIOT_OPC
 {
+    using IIOT_OPC.DataAccess;
+    using IIOT_OPC.Shared.Configuration;
+    using IIOT_OPC.Shared.Extensions;
     using IIOT_OPC.Shared.Models;
     using IOT_OPC.DataHandler;
     using Kepware.ClientAce.OpcDaClient;
@@ -9,10 +12,12 @@
         DaServerMgt daServerMgt = new DaServerMgt();
         ConnectInfo connectInfo = new ConnectInfo();
         PlantStateHandler _plantState = new PlantStateHandler(); // todo: init this object with PlantState argument
+        ConfigBuilder<AppConfig> _appsettings = new ConfigBuilder<AppConfig>(Utils.FileToProjectDirectory("..\\IIOT_OPCconfig.json"));
 
         public DatasHandler()
         {
             daServerMgt.DataChanged += DaServerMgt_DataChanged;
+            var ConnectionString = _appsettings.Config.ConnectionString;          
         }
 
         public void DaServerMgt_DataChanged(int clientSubscription, bool allQualitiesGood, bool noErrors, ItemValueCallback[] itemValues)
@@ -194,7 +199,6 @@
         }
         private void SavePlantStateToDb(PlantStateRowData rowData)
         {
-
         }
     }
 }
