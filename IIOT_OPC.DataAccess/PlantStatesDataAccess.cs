@@ -28,7 +28,8 @@
                            ,PlantState)
                      VALUES
                            (@TimeStamp
-                           ,@PlantState);";
+                           ,@PlantState);
+                SELECT @@Identity";
             return Insert(query, item);
         }
 

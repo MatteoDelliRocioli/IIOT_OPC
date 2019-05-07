@@ -31,7 +31,8 @@
                      VALUES
                            (@TimeStamp
                            ,@NumPieces
-                           ,@NumPiecesRejected);";
+                           ,@NumPiecesRejected);
+                SELECT @@Identity";
             return Insert(query, item);
         }
 
