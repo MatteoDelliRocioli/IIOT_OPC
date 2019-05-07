@@ -16,14 +16,27 @@
         PlantStateHandler _plantState; // todo: init this object with PlantState argument
         ConfigBuilder<AppConfig> _appsettings = new ConfigBuilder<AppConfig>(Utils.FileToProjectDirectory("..\\IIOT_OPCconfig.json"));
         AbstractDataAccess<PlantStateRowData> plantStateDataAccess;
-        Timer timerMidnight;
+        AbstractDataAccess<PlantStateDuration> plantStateDurationDataAccess;
+        AbstractDataAccess<DailyProduction> dailyProductionDataAccess;
+        Timer timerMidnight = new Timer();
 
+        //prof, 50 euro per un 100, eh dai? :*
+        //se vuoi anche uno sboccaponji
         public DatasHandler()
         {
             daServerMgt.DataChanged += DaServerMgt_DataChanged;
             var connectionString = _appsettings.Config.ConnectionString;
-            //var ConnectionString = ("Data Source=DESKTOP-KE529L7\\SQLEXPRESS;Initial Catalog=iotOpc;Integrated Security=True");      
             plantStateDataAccess = new PlantStatesDataAccess()
+            {
+                ConnectionString = connectionString
+            };
+
+            plantStateDurationDataAccess = new PlantStateDurationDataAccess()
+            {
+                ConnectionString = connectionString
+            };
+
+            dailyProductionDataAccess = new DailyProductionDataAccess()
             {
                 ConnectionString = connectionString
             };
@@ -38,9 +51,7 @@
                     if (itemValue.ResultID.Succeeded)
                     {
                         Console.WriteLine(itemValue.TimeStamp + ": " + itemValue.ClientHandle + " - " + itemValue.Value + "\n");
-                        var state = itemValue.Value;
-                        PlantState plant;
-                        Enum.TryParse<PlantState>(itemValue.Value.ToString(), out plant);
+                        Enum.TryParse<PlantState>(itemValue.Value.ToString(), out PlantState plant);
                         if (_plantState == null)
                         {
                             _plantState = new PlantStateHandler(itemValue.TimeStamp, plant);
@@ -90,9 +101,9 @@
                 Console.WriteLine(ex.ToString());
             }
 
-            timerMidnight.Elapsed += (sender, e) => OnMidnight();
+            InitMidnightTimer();
 
-            AggiornaDati();
+            InitPlantState();
 
             // Tag a cui mi voglio sottoscrivere
             ItemIdentifier[] items = new ItemIdentifier[1];
@@ -140,30 +151,40 @@
 
         }
 
-        private void AggiornaDati()
+        /// <summary>
+        /// 
+        /// </summary>
+        private void InitMidnightTimer()
+        {
+            //gets the interval
+            timerMidnight.Interval = (new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59) - DateTime.Now).TotalMilliseconds;
+            timerMidnight.Interval = 5000;
+            timerMidnight.Elapsed += (sender, e) => OnMidnight();
+        }
+
+        private void InitPlantState()
         {
             // Aggiorno a mano i valori di tre tag
 
             int maxAge = 0;
-            ItemIdentifier[] OPCItems = new ItemIdentifier[2];
+            ItemIdentifier[] OPCItems = new ItemIdentifier[1];
             ItemValue[] OPCItemValues = null;
 
             OPCItems[0] = new ItemIdentifier();
-    
             OPCItems[0].ItemName = "its-iot-device.Device1.PlantStatus";
             OPCItems[0].ClientHandle = 1;
 
-            OPCItems[1] = new ItemIdentifier();
-            OPCItems[1].ItemName = "its-iot-device.Device1.PieceCounter";
-            OPCItems[1].ClientHandle = 2;
+            //OPCItems[1] = new ItemIdentifier();
+            //OPCItems[1].ItemName = "its-iot-device.Device1.PieceCounter";
+            //OPCItems[1].ClientHandle = 2;
 
-            /*OPCItems[2] = new Kepware.ClientAce.OpcDaClient.ItemIdentifier();
-            OPCItems[2].ItemName = "Simulation Examples.Functions.Ramp1";
-            OPCItems[2].ClientHandle = 3;*/
+            //OPCItems[2] = new ItemIdentifier();
+            //OPCItems[2].ItemName = "its-iot-device.Device1.DefectedPiecesCounter";
+            //OPCItems[2].ClientHandle = 3;
 
-            /*Console.WriteLine(OPCItems[0].ItemName + "\n");*/
-            Console.WriteLine(OPCItems[0].ItemName + "ciao !!!!!!!\n");
-            /*Console.WriteLine(OPCItems[2].ItemName + "\n");*/
+            Console.WriteLine(OPCItems[0].ItemName + "--STATUS \n");
+            //Console.WriteLine(OPCItems[1].ItemName + "--PIECE COUNTER \n");
+            //Console.WriteLine(OPCItems[2].ItemName + "--DEFECTED PIECES\n");
 
             try
             {
@@ -181,6 +202,13 @@
                 if (OPCItems[0].ResultID.Succeeded & OPCItemValues[0].Quality.IsGood)
                 {
                     Console.WriteLine(OPCItemValues[0].Value.ToString() + "\n");
+
+                    Enum.TryParse<PlantState>(OPCItemValues[0].Value.ToString(), out PlantState plant);
+                    if (_plantState == null)
+                    {
+                        _plantState = new PlantStateHandler(OPCItemValues[0].TimeStamp, plant);
+                    }
+                    OnPlantStateChange(OPCItemValues[0].TimeStamp, plant);
                 }
                 else
                 {
@@ -203,6 +231,58 @@
 
         }
 
+        private void PollingCountPieces()
+        {
+            // Aggiorno a mano i valori di tre tag
+
+            int maxAge = 0;
+            ItemIdentifier[] OPCItems = new ItemIdentifier[2];
+            ItemValue[] OPCItemValues = null;
+
+            OPCItems[0] = new ItemIdentifier();
+            OPCItems[0].ItemName = "its-iot-device.Device1.PieceCounter";
+            OPCItems[0].ClientHandle = 1;
+
+            OPCItems[1] = new ItemIdentifier();
+            OPCItems[1].ItemName = "its-iot-device.Device1.DefectedPiecesCounter";
+            OPCItems[1].ClientHandle = 2;
+
+            Console.WriteLine(OPCItems[1].ItemName + "--PIECE COUNTER \n");
+            Console.WriteLine(OPCItems[2].ItemName + "--DEFECTED PIECES\n");
+
+            try
+            {
+                daServerMgt.Read(maxAge, ref OPCItems, out OPCItemValues);
+                if (OPCItems[0].ResultID.Succeeded && OPCItemValues[0].Quality.IsGood && OPCItems[1].ResultID.Succeeded && OPCItemValues[1].Quality.IsGood)
+                {
+                    int num;
+                    int numDefected;
+                    Console.WriteLine(OPCItemValues[0].Value.ToString() + "\n");
+                    Console.WriteLine(OPCItemValues[1].Value.ToString() + "\n");
+
+                    Int32.TryParse(OPCItemValues[0].Value.ToString(), out num);
+                    Int32.TryParse(OPCItemValues[1].Value.ToString(), out numDefected);
+
+                    DailyProduction dailyProduction = new DailyProduction()
+                    {
+                        NumPieces = num,
+                        NumPiecesRejected = numDefected
+                    };
+
+                    SavePlantDailyProductionToDb(dailyProduction);
+                }
+                else
+                {
+                    Console.WriteLine(OPCItems[0].ResultID.Description + "\n");
+                    Console.WriteLine(OPCItems[1].ResultID.Description + "\n");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
         private void OnPlantStateChange(DateTime timeStamp, PlantState newState)
         {
             _plantState.SetCurrentState(timeStamp, newState);
@@ -210,20 +290,38 @@
         }
         private void OnMidnight()
         {
-            timerMidnight.Interval = 860000399; //resets the timer
-            //the following updated the object
+            //timerMidnight.Interval = 860000399; //resets the timer
+            timerMidnight.Interval = 5000; //resets the timer
+                                                //the following updated the object
             var now = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23, 59, 59);
             _plantState.SetCurrentState(now, _plantState.CurrentState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
+            SavePlantDurationToDb(_plantState.PlantStateDuration);
+            PollingCountPieces();
             now = now.AddSeconds(1);
-            _plantState = new PlantStateHandler(now, _plantState.CurrentState);
             //missing polling operations (read and persistence);
-            SavePlantStateToDb(_plantState.PlantStateRowData);
+            //get data from durations counters
+            //_plantState.PlantStateDuration.OffDuration.
+            //plantStateDataAccess
+            //save them to the db
 
+            _plantState = new PlantStateHandler(now, _plantState.CurrentState);
+            SavePlantStateToDb(_plantState.PlantStateRowData);
         }
+
         private void SavePlantStateToDb(PlantStateRowData rowData)
         {
             plantStateDataAccess.Insert(rowData);
+        }
+
+        private void SavePlantDurationToDb(PlantStateDuration stateDuration)
+        {
+            plantStateDurationDataAccess.Insert(stateDuration);
+        }
+
+        private void SavePlantDailyProductionToDb(DailyProduction dailyProduction)
+        {
+            dailyProductionDataAccess.Insert(dailyProduction);
         }
     }
 }
