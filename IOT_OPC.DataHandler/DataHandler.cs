@@ -98,7 +98,8 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                // ab edit: aggiungiamo ilcontesto per capire l'errore
+                Console.WriteLine($"Connect exeception: {ex.ToString()}");
             }
 
             InitMidnightTimer();
@@ -146,7 +147,8 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                // ab edit: aggiungiamo ilcontesto per capire l'errore
+                Console.WriteLine($"Connect.subscribe exeception: {ex.ToString()}");
             }
 
         }
@@ -158,8 +160,10 @@
         {
             //gets the interval
             timerMidnight.Interval = (new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 23, 59, 59) - DateTime.Now).TotalMilliseconds;
-            timerMidnight.Interval = 5000;
+            timerMidnight.Interval = 2000;
             timerMidnight.Elapsed += (sender, e) => OnMidnight();
+            // ab edit: è necessario avviare il timer
+            timerMidnight.Start();
         }
 
         private void InitPlantState()
@@ -170,9 +174,11 @@
             ItemIdentifier[] OPCItems = new ItemIdentifier[1];
             ItemValue[] OPCItemValues = null;
 
-            OPCItems[0] = new ItemIdentifier();
-            OPCItems[0].ItemName = "its-iot-device.Device1.PlantStatus";
-            OPCItems[0].ClientHandle = 1;
+            OPCItems[0] = new ItemIdentifier
+            {
+                ItemName = "its-iot-device.Device1.PlantStatus",
+                ClientHandle = 1
+            };
 
             //OPCItems[1] = new ItemIdentifier();
             //OPCItems[1].ItemName = "its-iot-device.Device1.PieceCounter";
@@ -226,7 +232,8 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                // ab edit: aggiungiamo ilcontesto per capire l'errore
+                Console.WriteLine($"InitPlantState exeception: {ex.ToString()}");
             }
 
         }
@@ -247,8 +254,9 @@
             OPCItems[1].ItemName = "its-iot-device.Device1.DefectedPiecesCounter";
             OPCItems[1].ClientHandle = 2;
 
-            Console.WriteLine(OPCItems[1].ItemName + "--PIECE COUNTER \n");
-            Console.WriteLine(OPCItems[2].ItemName + "--DEFECTED PIECES\n");
+            // ab edit: corretto gli indici
+            Console.WriteLine(OPCItems[0].ItemName + "--PIECE COUNTER");
+            Console.WriteLine(OPCItems[1].ItemName + "--DEFECTED PIECES\n");
 
             try
             {
@@ -265,6 +273,8 @@
 
                     DailyProduction dailyProduction = new DailyProduction()
                     {
+                        // ab edit: mancava Timestamp
+                        TimeStamp =DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59),
                         NumPieces = num,
                         NumPiecesRejected = numDefected
                     };
@@ -273,13 +283,15 @@
                 }
                 else
                 {
-                    Console.WriteLine(OPCItems[0].ResultID.Description + "\n");
-                    Console.WriteLine(OPCItems[1].ResultID.Description + "\n");
+                    // ab edit: aggiungiamo ilcontesto per capire l'errore
+                    Console.WriteLine($"ResultID 0: {OPCItems[0].ResultID.Description}\n");
+                    Console.WriteLine($"ResultID 1: {OPCItems[1].ResultID.Description}\n");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                // ab edit: aggiungiamo ilcontesto per capire l'errore
+                Console.WriteLine($"PollingCountPieces exeception: {ex.ToString()}");
             }
         }
 
@@ -294,6 +306,8 @@
             timerMidnight.Interval = 5000; //resets the timer
                                                 //the following updated the object
             var now = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 23, 59, 59);
+            // ab edit: a scopo di debug _plantState.SetCurrentState  imposta a 0 lo span se è negativo, come accade
+            // quando OnMidnight viene chiamata dal timer ogni X secondi anzichè a mezzanotte
             _plantState.SetCurrentState(now, _plantState.CurrentState);
             SavePlantStateToDb(_plantState.PlantStateRowData);
             SavePlantDurationToDb(_plantState.PlantStateDuration);

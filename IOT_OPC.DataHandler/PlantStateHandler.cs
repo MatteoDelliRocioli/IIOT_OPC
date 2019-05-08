@@ -62,6 +62,13 @@
             // calculate and update the duration for the current state
             TimeSpan currentStateDuration = currentTime - _startTime;
 
+            // ab edit: a scopo di debug _plantState.SetCurrentState  imposta a 0 lo span se è negativo, come accade
+            // quando OnMidnight viene chiamata dal timer ogni X secondi anzichè a mezzanotte
+            if ( currentStateDuration.CompareTo(new TimeSpan(0))<0)
+            {
+                Console.WriteLine($"    currentStateDuration: {currentStateDuration}"  );
+                currentStateDuration = new TimeSpan(0);
+            }
             // store the value in the dictionary
             _statesDuration[CurrentState] = lastStateDuration + currentStateDuration;
 
@@ -75,6 +82,9 @@
             {
                 return new PlantStateDuration()
                 {
+                    
+                    // ab edit: è necessario impostare il timeStamp 
+                    TimeStamp = _startTime,
                     OffDuration = _statesDuration[PlantState.Off],
                     OnRunningDuration = _statesDuration[PlantState.OnRunning],
                     OnStoppedfDuration = _statesDuration[PlantState.OnStopped]
