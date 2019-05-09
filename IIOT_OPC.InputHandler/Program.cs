@@ -24,7 +24,7 @@ namespace IIOT_OPC.InputHandler
                         dateToCheck = checkDateFromUser();
                         if (dateToCheck != defaultDate)
                         {
-                            state = ProgramState.oeeCalculation;
+                            state = ProgramState.getDateFromDb;
                         }
                         break;
                     case ProgramState.getDateFromDb:
