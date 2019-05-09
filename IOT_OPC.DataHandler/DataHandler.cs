@@ -268,8 +268,8 @@
                     Console.WriteLine(OPCItemValues[0].Value.ToString() + "\n");
                     Console.WriteLine(OPCItemValues[1].Value.ToString() + "\n");
 
-                    Int32.TryParse(OPCItemValues[0].Value.ToString(), out num);
-                    Int32.TryParse(OPCItemValues[1].Value.ToString(), out numDefected);
+                    int.TryParse(OPCItemValues[0].Value.ToString(), out num);
+                    int.TryParse(OPCItemValues[1].Value.ToString(), out numDefected);
 
                     DailyProduction dailyProduction = new DailyProduction()
                     {
