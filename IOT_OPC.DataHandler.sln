@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IIOT_OPC.Shared", "IIOT_OPC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IIOT_OPC.DataAccess", "IIOT_OPC.DataAccess\IIOT_OPC.DataAccess.csproj", "{A36A8320-6E80-491B-9C93-C9E40B82E052}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IIOT_OPC.InputHandler", "IIOT_OPC.InputHandler\IIOT_OPC.InputHandler.csproj", "{F3521400-ED9E-4D05-882F-8D52CA471A05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{A36A8320-6E80-491B-9C93-C9E40B82E052}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A36A8320-6E80-491B-9C93-C9E40B82E052}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A36A8320-6E80-491B-9C93-C9E40B82E052}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3521400-ED9E-4D05-882F-8D52CA471A05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3521400-ED9E-4D05-882F-8D52CA471A05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3521400-ED9E-4D05-882F-8D52CA471A05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3521400-ED9E-4D05-882F-8D52CA471A05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
