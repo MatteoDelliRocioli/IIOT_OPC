@@ -15,6 +15,7 @@ namespace IIOT_OPC.InputHandler
             ProgramState state = ProgramState.checkingDate;
             DateTime dateToCheck;
             DateTime defaultDate = new DateTime();
+            TimeSpan cycleTime = new TimeSpan(159);
             dateToCheck = defaultDate;
             double availability = 0.573;
             double quality = 1;
@@ -25,21 +26,27 @@ namespace IIOT_OPC.InputHandler
                 switch (state)
                 {
                     case ProgramState.checkingDate:
+                        Console.WriteLine("sono dentro checkingDate");
                         dateToCheck = checkDateFromUser();
                         if (dateToCheck != defaultDate)
                         {
-                            state = ProgramState.writeOutPut;
+                            state = ProgramState.oeeCalculation;
                         }
                         break;
                     case ProgramState.getDateFromDb:
-                        Console.WriteLine("sono dentro date");
+                        Console.WriteLine("sono dentro getDateFromDb");
                         Console.ReadLine();
                         break;
                     case ProgramState.oeeCalculation:
-                        Console.WriteLine("sono dentro calculation");
-                        Console.ReadLine();
+                        Console.WriteLine("sono dentro oeeCalculation");
+
+                        availability = GetAvailability(new TimeSpan(36000), new TimeSpan(56000));
+                        quality = GetQuality(1230,24);
+                        performance = GetPerformances(1230-24, new TimeSpan(36000),cycleTime);
+                        state = ProgramState.writeOutPut;
                         break;
                     case ProgramState.writeOutPut:
+                        Console.WriteLine("sono dentro writeOutPut");
                         PrintOEE(dateToCheck, availability, quality, performance);
  
                         state = ProgramState.checkingDate;
@@ -69,7 +76,18 @@ namespace IIOT_OPC.InputHandler
             Console.Clear();
             return userDateTime;
         }
-
+        static double GetAvailability(TimeSpan operatingTime, TimeSpan scheduledTime)
+        {
+            return operatingTime/scheduledTime;
+        }
+        static double GetQuality(int numPieces, int numDefectedPieces)
+        {
+            return (numPieces-numDefectedPieces)/numPieces;
+        }
+        static double GetPerformances(int numPieces, TimeSpan operatingTime, TimeSpan cycleTime)
+        {
+            return numPieces*cycleTime/operatingTime;
+        }
         static void PrintOEE(DateTime pippo, double availability, double quality, double performance)
         {
             string da = String.Format("\n The OEE values in {0:d} are:", pippo);
