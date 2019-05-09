@@ -15,6 +15,10 @@ namespace IIOT_OPC.InputHandler
             ProgramState state = ProgramState.checkingDate;
             DateTime dateToCheck;
             DateTime defaultDate = new DateTime();
+            dateToCheck = defaultDate;
+            double availability = 0.573;
+            double quality = 1;
+            double performance = 0.12;
 
             while (true)
             {
@@ -24,7 +28,7 @@ namespace IIOT_OPC.InputHandler
                         dateToCheck = checkDateFromUser();
                         if (dateToCheck != defaultDate)
                         {
-                            state = ProgramState.getDateFromDb;
+                            state = ProgramState.writeOutPut;
                         }
                         break;
                     case ProgramState.getDateFromDb:
@@ -36,8 +40,9 @@ namespace IIOT_OPC.InputHandler
                         Console.ReadLine();
                         break;
                     case ProgramState.writeOutPut:
-                        Console.WriteLine("sono dentro writeOutput");
-                        Console.ReadLine();
+                        PrintOEE(dateToCheck, availability, quality, performance);
+ 
+                        state = ProgramState.checkingDate;
                         break;
                     default:
                         break;
@@ -63,6 +68,21 @@ namespace IIOT_OPC.InputHandler
             Console.ReadLine();
             Console.Clear();
             return userDateTime;
+        }
+
+        static void PrintOEE(DateTime pippo, double availability, double quality, double performance)
+        {
+            string da = String.Format("\n The OEE values in {0:d} are:", pippo);
+
+            string av = String.Format("  Availability: {0:0.0}%", availability);
+            string qu = String.Format("  Quality: {0:0.0}%", quality);
+            string pe = String.Format("  Performance: {0:0.0}%\n", performance);
+
+            Console.WriteLine(da); //Data
+
+            Console.WriteLine(av); //Availability
+            Console.WriteLine(qu); //Quality
+            Console.WriteLine(pe); //Performance
         }
 
         public enum ProgramState
