@@ -39,16 +39,16 @@
       <HintPath>..\packages\Dapper.1.60.6\lib\net451\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="Kepware.ClientAce.BrowseControls">
-      <HintPath>..\..\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.BrowseControls.dll</HintPath>
+      <HintPath>..\..\..\Desktop\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.BrowseControls.dll</HintPath>
     </Reference>
     <Reference Include="Kepware.ClientAce.DA_Junction">
-      <HintPath>..\..\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.DA_Junction.dll</HintPath>
+      <HintPath>..\..\..\Desktop\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.DA_Junction.dll</HintPath>
     </Reference>
     <Reference Include="Kepware.ClientAce.KEPServerExControls">
-      <HintPath>..\..\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.KEPServerExControls.dll</HintPath>
+      <HintPath>..\..\..\Desktop\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.KEPServerExControls.dll</HintPath>
     </Reference>
     <Reference Include="Kepware.ClientAce.OpcClient">
-      <HintPath>..\..\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.OpcClient.dll</HintPath>
+      <HintPath>..\..\..\Desktop\ClientAceTestApp\ClientAceMinimoDesktop\refs\Kepware.ClientAce.OpcClient.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
