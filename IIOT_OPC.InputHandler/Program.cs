@@ -1,4 +1,4 @@
-﻿using IIOT_OPC.DataAccess;
+using IIOT_OPC.DataAccess;
 using IIOT_OPC.Shared.Configuration;
 using IIOT_OPC.Shared.Extensions;
 using IIOT_OPC.Shared.Models;
@@ -19,20 +19,26 @@ namespace IIOT_OPC.InputHandler
             ProgramState state = ProgramState.checkingDate;
             DateTime dateToCheck = new DateTime();
             DateTime defaultDate = new DateTime();
+            TimeSpan cycleTime = new TimeSpan(159);
+            dateToCheck = defaultDate;
+            double availability = 0.573;
+            double quality = 1;
+            double performance = 0.12;
 
             while (true)
             {
                 switch (state)
                 {
                     case ProgramState.checkingDate:
+                        Console.WriteLine("sono dentro checkingDate");
                         dateToCheck = CheckDateFromUser();
                         if (dateToCheck != defaultDate)
                         {
                             state = ProgramState.getDataFromDb;
                         }
                         break;
+						
                     case ProgramState.getDataFromDb:
-
                         Console.WriteLine("sono dentro getDataFromDb");
                         int dbResult = GetDataFromDB(dateToCheck, out int productedPieces, out int defectedPieces, out TimeSpan plannedProductionTime);
                         if (dbResult == 0)
@@ -43,17 +49,22 @@ namespace IIOT_OPC.InputHandler
                         {
                             state = ProgramState.checkingDate;
                         }
-                        Console.ReadLine();
                         break;
+						
                     case ProgramState.oeeCalculation:
                         Console.WriteLine("sono dentro oeeCalculation");
-                        Console.ReadLine();
+
+                        availability = GetAvailability(new TimeSpan(36000), new TimeSpan(56000));
+                        quality = GetQuality(1230,24);
+                        performance = GetPerformances(1230-24, new TimeSpan(36000),cycleTime);
+                        state = ProgramState.writeOutPut;
                         break;
+						
                     case ProgramState.writeOutPut:
-                        Console.WriteLine("sono dentro writeOutput");
-                        Console.ReadLine();
-                        break;
-                    default:
+                        Console.WriteLine("sono dentro writeOutPut");
+                        PrintOEE(dateToCheck, availability, quality, performance);
+ 
+                        state = ProgramState.checkingDate;
                         break;
                 }
             }
@@ -141,6 +152,32 @@ namespace IIOT_OPC.InputHandler
             Console.ReadLine();
             Console.Clear();
             return userDateTime;
+        }
+        static double GetAvailability(TimeSpan operatingTime, TimeSpan scheduledTime)
+        {
+            return operatingTime/scheduledTime;
+        }
+        static double GetQuality(int numPieces, int numDefectedPieces)
+        {
+            return (numPieces-numDefectedPieces)/numPieces;
+        }
+        static double GetPerformances(int numPieces, TimeSpan operatingTime, TimeSpan cycleTime)
+        {
+            return numPieces*cycleTime/operatingTime;
+        }
+        static void PrintOEE(DateTime pippo, double availability, double quality, double performance)
+        {
+            string da = String.Format("\n The OEE values in {0:d} are:", pippo);
+
+            string av = String.Format("  Availability: {0:0.0}%", availability);
+            string qu = String.Format("  Quality: {0:0.0}%", quality);
+            string pe = String.Format("  Performance: {0:0.0}%\n", performance);
+
+            Console.WriteLine(da); //Data
+
+            Console.WriteLine(av); //Availability
+            Console.WriteLine(qu); //Quality
+            Console.WriteLine(pe); //Performance
         }
 
         public enum ProgramState
