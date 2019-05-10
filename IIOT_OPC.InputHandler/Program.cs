@@ -17,13 +17,16 @@ namespace IIOT_OPC.InputHandler
             /**/
             /**/
             ProgramState state = ProgramState.checkingDate;
-            DateTime dateToCheck = new DateTime();
             DateTime defaultDate = new DateTime();
-            TimeSpan cycleTime = new TimeSpan(159);
-            dateToCheck = defaultDate;
-            double availability = 0.573;
-            double quality = 1;
-            double performance = 0.12;
+            DateTime dateToCheck = defaultDate;
+            TimeSpan cycleTime = new TimeSpan(0,0,20);// arbitrario
+            double availability = 0;
+            double quality = 0;
+            double performance = 0;
+            int productedPieces = 0;
+            int defectedPieces = 0;
+            TimeSpan plannedProductionTime =new TimeSpan(0);
+            TimeSpan productionTime = new TimeSpan(0);
 
             while (true)
             {
@@ -32,31 +35,53 @@ namespace IIOT_OPC.InputHandler
                     case ProgramState.checkingDate:
                         Console.WriteLine("sono dentro checkingDate");
                         dateToCheck = CheckDateFromUser();
-                        if (dateToCheck != defaultDate)
-                        {
+                        // actually this check is unnecessary because CheckDateFromUser returns only
+                        // after a valid date was input
+                        //if (dateToCheck != defaultDate)
+                        //{
                             state = ProgramState.getDataFromDb;
-                        }
+                        //}
                         break;
-						
+
+                        // excecution stratight through the switch is not allowed in c#
+                        // https://stackoverflow.com/questions/6696692/control-cannot-fall-through-from-one-case-label
+                        /*if (dateToCheck == defaultDate)
+                        {
+                            break;
+                        }
+                        state = ProgramState.getDataFromDb;*/
+
                     case ProgramState.getDataFromDb:
                         Console.WriteLine("sono dentro getDataFromDb");
-                        int dbResult = GetDataFromDB(dateToCheck, out int productedPieces, out int defectedPieces, out TimeSpan plannedProductionTime);
-                        if (dbResult == 0)
-                        {
-                            state = ProgramState.oeeCalculation;
-                        }
-                        else if (dbResult == -2)
+                        int dbResult = GetDataFromDB(dateToCheck, out productedPieces, out defectedPieces, out plannedProductionTime, out productionTime);
+
+                        // reversed logic:
+                        //if (dbResult == 0)// 0: success, -1: error, -2: record not found
+                        //{
+                        //    state = ProgramState.oeeCalculation;
+                        //}
+                        //else /*if (dbResult == -2)*/ // don't mind why it failed
+                        //{
+                        //    state = ProgramState.checkingDate;
+                        //}
+                        //break;
+
+                        // straight logic
+                        // process flow continues on success or exit on fail
+                        if (dbResult != 0)// 0: success, -1: error, -2: record not found
                         {
                             state = ProgramState.checkingDate;
+                            break;
                         }
+                        state = ProgramState.oeeCalculation;
                         break;
-						
+
                     case ProgramState.oeeCalculation:
                         Console.WriteLine("sono dentro oeeCalculation");
 
-                        availability = GetAvailability(new TimeSpan(36000), new TimeSpan(56000));
-                        quality = GetQuality(1230,24);
-                        performance = GetPerformances(1230-24, new TimeSpan(36000),cycleTime);
+                        availability = GetAvailability(productionTime, plannedProductionTime);
+                        quality = GetQuality(productedPieces,defectedPieces);
+                        performance = GetPerformances(productedPieces, productionTime, cycleTime);
                         state = ProgramState.writeOutPut;
                         break;
 						
@@ -70,7 +95,7 @@ namespace IIOT_OPC.InputHandler
             }
         }
 
-        static int GetDataFromDB(DateTime date, out int productedPieces, out int defectedPieces, out TimeSpan plannedProductionTime)
+        static int GetDataFromDB(DateTime date, out int productedPieces, out int defectedPieces, out TimeSpan plannedProductionTime, out TimeSpan productionTime)
         {
 
             ConfigBuilder<AppConfig> _appsettings = new ConfigBuilder<AppConfig>(Utils.FileToProjectDirectory("..\\IIOT_OPCconfig.json"));
@@ -82,6 +107,7 @@ namespace IIOT_OPC.InputHandler
             productedPieces = 0;
             defectedPieces = 0;
             plannedProductionTime = new TimeSpan(0);
+            productionTime = new TimeSpan(0);
 
             #region try get duration
             try
@@ -89,7 +115,7 @@ namespace IIOT_OPC.InputHandler
                 stateDuration = plantStateDurationDataAccess.GetItem(
                     new
                     {
-                        TimeStamp = date
+                        TimeStamp = date.AddHours(23).AddMinutes(59).AddSeconds(59)
                     });
             }
             catch (Exception ex)
@@ -105,7 +131,7 @@ namespace IIOT_OPC.InputHandler
                 productionObject = dailyProductionDataAccess.GetItem(
                     new
                     {
-                        TimeStamp = date
+                        TimeStamp = date.AddHours(23).AddMinutes(59).AddSeconds(59)
                     });
             }
             catch (Exception ex)
@@ -115,22 +141,25 @@ namespace IIOT_OPC.InputHandler
             }
             #endregion
 
-            if (stateDuration == null)
+            if (stateDuration == null || productionObject == null)
             {
-                Console.WriteLine("runningDuration o onStoppedDuration not founded");
+                Console.WriteLine("runningDuration o onStoppedDuration not found");
                 Console.WriteLine("introduce a new date to check");
                 return -2;
             }
-
             plannedProductionTime = stateDuration.OnRunningDuration + stateDuration.OnStoppedfDuration;
+            productionTime = stateDuration.OnRunningDuration;
             productedPieces = productionObject.NumPieces;
             defectedPieces = productionObject.NumPiecesRejected;
-            /*if (productedPieces == null || defectedPieces == null || plannedProductionTime == default(TimeSpan))
-            {
-                Console.WriteLine("Uno dei valori tra pezzi prodotti, difettati o tempo di produzione non sono stati valorizzati da db");
-                Console.ReadLine();
-                return -1;
-            }*/
+
+            //Console.WriteLine("db get result:");
+            //Console.WriteLine($"    OnRunningDuration {string.Format("{0:t}", stateDuration.OnRunningDuration)}");
+            //Console.WriteLine($"    OnStoppedfDuration {string.Format("{0:t}", stateDuration.OnStoppedfDuration)}");
+            //Console.WriteLine($"    plannedProductionTime {string.Format("{0:t}", plannedProductionTime)}");
+            //Console.WriteLine($"    productionTime {string.Format("{0:t}", productionTime)}");
+            //Console.WriteLine($"    productedPieces {productedPieces}");
+            //Console.WriteLine($"    defectedPieces {defectedPieces}");
+
             return 0;
         }
 
@@ -155,23 +184,23 @@ namespace IIOT_OPC.InputHandler
         }
         static double GetAvailability(TimeSpan operatingTime, TimeSpan scheduledTime)
         {
-            return operatingTime/scheduledTime;
+            return (operatingTime/scheduledTime);
         }
         static double GetQuality(int numPieces, int numDefectedPieces)
         {
-            return (numPieces-numDefectedPieces)/numPieces;
+            return (double)(numPieces-numDefectedPieces)/numPieces;
         }
         static double GetPerformances(int numPieces, TimeSpan operatingTime, TimeSpan cycleTime)
         {
-            return numPieces*cycleTime/operatingTime;
+            return (double)numPieces*cycleTime/operatingTime;
         }
-        static void PrintOEE(DateTime pippo, double availability, double quality, double performance)
+        static void PrintOEE(DateTime targetDate, double availability, double quality, double performance)
         {
-            string da = String.Format("\n The OEE values in {0:d} are:", pippo);
+            string da = string.Format("\nThe OEE values in {0:d} are:", targetDate);
 
-            string av = String.Format("  Availability: {0:0.0}%", availability);
-            string qu = String.Format("  Quality: {0:0.0}%", quality);
-            string pe = String.Format("  Performance: {0:0.0}%\n", performance);
+            string av = string.Format("  Availability:   {0:0.0}%", availability * 100);
+            string qu = string.Format("  Quality:        {0:0.0}%", quality * 100);
+            string pe = string.Format("  Performance:    {0:0.0}%\n", performance * 100);
 
             Console.WriteLine(da); //Data
 
